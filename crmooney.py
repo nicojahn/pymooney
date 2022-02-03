@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import argparse
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -283,23 +285,58 @@ def crmooney_frompath(
 
 if __name__ == "__main__":
 
-    ## Use search words to search images in Flickr image database
-    try:
-        os.path.exists(sys.argv[1])
-        print(f"Search words read from file: {sys.argv[1]}")
-        search_words = utils.read_file(sys.argv[1])
-    except (IOError, IndexError):
-        search_words = ["cat"]
+    # Use search words to search images in Flickr image database
+    parser = argparse.ArgumentParser(description=f"PyMooney by {__author__}")
+    parser.add_argument(
+        "-s",
+        "--search_file",
+        default=None,
+        type=Path,
+        help="Read search-words from this file",
+    )
+    parser.add_argument(
+        "-i",
+        "--image_path",
+        default=None,
+        type=Path,
+        help="The image path for offline conversion",
+    )
+    args = parser.parse_args()
+
+    # Check for at most one argument
+    search_file = not args.search_file is None
+    image_path = not args.image_path is None
+    assert (not search_file) or (
+        not image_path
+    ), "Support at most one command line argument for each run."
+
+    # Check if desired path exists
+    search_words = ["cat"]
+    path = args.search_file
+    if search_file:
+        assert path.is_file(), f"Sorry, but '{str(path)}' is not a file."
+
+        search_words = utils.read_file(str(path))
+        assert search_words, "Please support a valid search-words file. Aborting."
+        print(f"Search words read from: '{str(path)}'")
+
+    elif image_path:
+        path = args.image_path
+        assert path.exists(), f"Image path '{str(path)}' does not exists."
 
     # Flickr-API authentication keys.
     # Get your own before using this from https://www.flickr.com/services/api/
-    # API_KEY = ""
-    # API_SECRET = ""
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     API_SECRET = os.getenv("API_SECRET")
+
     try:
-        assert API_KEY and API_SECRET
+        assert not image_path, ""
+
+        assert API_KEY and API_SECRET, (
+            "You need an API_KEY and API_SECRET to continue.\n"
+            + "Check https://www.flickr.com/services/api"
+        )
 
         print(
             "Good news, you have API_KEY and API_SECRET defined. You are ready to go."
@@ -331,31 +368,31 @@ if __name__ == "__main__":
             threshold_method="global_otsu",
         )
 
-    except AssertionError:
+    except AssertionError as error:
+        print(error)
+
         ## Create images from a given path
-        print(
-            "You need an API_KEY and API_SECRET to continue.\n"
-            + "Check https://www.flickr.com/services/api"
-        )
+        imagepath = str(path)
 
-        imagepath = os.path.join(os.getcwd(), "images")
+        if not image_path:
+            imagepath = os.path.join(os.getcwd(), "images")
 
-        print("------------ or:\n")
-        choice = (
-            input(
-                f"Press [ENTER] if you want to convert images in {imagepath}.\n"
-                + "Enter 'q' or 'quit' and press [ENTER] to cancel.\n"
+            print("------------ or:\n")
+            choice = (
+                input(
+                    f"Press [ENTER] if you want to convert images in {imagepath}.\n"
+                    + "Enter 'q' or 'quit' and press [ENTER] to cancel.\n"
+                )
+                or imagepath
             )
-            or imagepath
-        )
 
-        print(choice)
+            print(choice)
 
-        if choice in ("q", "quit"):
-            sys.exit()
+            if choice in ("q", "quit"):
+                sys.exit()
 
-        assert os.path.isdir(choice), f"Entered path '{choice}' is not a folder"
-        imagepath = choice
+            assert os.path.isdir(choice), f"Entered path '{choice}' is not a folder"
+            imagepath = choice
 
         mooneypath = os.path.join(imagepath, "mooney")
         imgs = crmooney_frompath(

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import mimetypes
 import os
 from pathlib import Path
 
@@ -41,26 +42,31 @@ def load_imgs(path):
     Returns:
         imgs: A dictionary of of n-dim images. Keys are the original filenames
     """
+    mimetypes.init()
 
     ## Get filenames
     filenames = []
     if os.path.isdir(path):
-        print(f"Images in {path} will be loaded")
+        print(f"Images in '{path}' will be loaded")
         for file in os.listdir(path):
-            if file.endswith(".jpg"):
+            (type, encoding) = mimetypes.guess_type(file)
+            if type and "image" in type:
                 filenames.append(os.path.basename(file))
         imagepath = path
     else:
         filenames.append(os.path.basename(path))
         imagepath = os.path.dirname(path)
-    print(f"{len(filenames)} images found in {path}")
+    print(f"{len(filenames)} images found in '{path}'")
 
     ## Load images
     imgs = {}
     for file in filenames:
-        print(f"\nImage: {file}")
-        imgs[file] = imread(os.path.join(imagepath, file))
-
+        print(f"\nImage: '{file}'")
+        try:
+            imgs[file] = imread(os.path.join(imagepath, file))
+            print("Done")
+        except ValueError:
+            print(f"'{file}' was unfortunately not an image. Skipping this one.")
     return imgs
 
 
