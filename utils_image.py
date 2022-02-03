@@ -4,12 +4,13 @@ import os
 from pathlib import Path
 
 import numpy as np
-from matplotlib.pyplot import imread
-from matplotlib.pyplot import imsave
 from PIL import Image
 from scipy import ndimage
+from skimage import img_as_ubyte
 from skimage.filters import rank
 from skimage.filters import threshold_otsu
+from skimage.io import imread
+from skimage.io import imsave
 from skimage.morphology import disk
 
 
@@ -125,4 +126,4 @@ def threshold_img(img, method="global_otsu", radius=50):
         threshold = rank.otsu(img, selem)
         img_binary = img >= threshold
 
-    return img_binary, threshold
+    return img_as_ubyte(img_binary), threshold
