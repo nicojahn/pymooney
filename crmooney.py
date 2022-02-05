@@ -18,7 +18,7 @@ __status__ = "Development"
 
 
 def apply_mooney_transform(
-    img, imagepath, imgname, transformations, url=None, photo_id=None
+    img, imagepath, imgname, mooneypath, transformations, url=None, photo_id=None
 ):
     """Given an image, calls the transformations needed to create the Mooney of
     it.
@@ -27,6 +27,7 @@ def apply_mooney_transform(
         img: n-dim image
         imagepath: parent dir of 'img'
         imgname: the filename of 'img'
+        mooneypath: path to which the generated images are saved
         transformations: dictionary with important transformation parameters
         url: if the image was downloaded, the url as a string
         photo_id: an id assigned to the image
@@ -204,7 +205,7 @@ def crmooney_fromdb(
         utils.get_image(url, filename)
 
         # Load image
-        img = utils_image.load_imgs(filename)
+        img = utils_image.load_imgs(imagepath, imgname)
         img = img[imgname]
 
         imgs_mooney.append(
@@ -212,6 +213,7 @@ def crmooney_fromdb(
                 img,
                 imagepath,
                 imgname,
+                mooneypath,
                 transformations,
                 url=url,
                 photo_id=photo["photo_id"],
@@ -249,10 +251,13 @@ def crmooney_frompath(
         imgs_mooney: A dictionary of Mooney images along with the threshold value,
             its original path and original image name.
     """
+    imagepath = os.path.dirname(filename)
+    if os.path.isdir(filename):
+        imagepath = filename
 
     if mooneypath == "":
-        if not os.path.dirname(filename) == "":
-            mooneypath = os.path.dirname(filename)
+        if not imagepath == "":
+            mooneypath = os.path.join(imagepath, "mooney")
         else:
             mooneypath = os.getcwd()
 
@@ -264,16 +269,14 @@ def crmooney_frompath(
     }
 
     # Load image
-    imgs = utils_image.load_imgs(filename)
+    img_names = utils_image.list_filenames(filename)
 
     imgs_mooney = []
-    for imgname, img in imgs.items():
+    for name in img_names:
+        img_dict = utils_image.load_imgs(imagepath, name)
         imgs_mooney.append(
             apply_mooney_transform(
-                img,
-                os.path.dirname(filename),
-                os.path.basename(imgname),
-                transformations,
+                img_dict[name], imagepath, name, mooneypath, transformations
             )
         )
 
@@ -394,10 +397,8 @@ if __name__ == "__main__":
             assert os.path.isdir(choice), f"Entered path '{choice}' is not a folder"
             imagepath = choice
 
-        mooneypath = os.path.join(imagepath, "mooney")
         imgs = crmooney_frompath(
             imagepath,
-            mooneypath=mooneypath,
             resize=False,
             smooth_sigma=6,
             image_size=(400, 400),

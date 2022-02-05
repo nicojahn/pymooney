@@ -34,39 +34,59 @@ def mkdir(folderpath):
         ) from error
 
 
-def load_imgs(path):
-    """Given a path load image(s). The input path can either be (i) a directory
-    in which case all the JPG-images will be loaded into a dictionary, or (ii)
-    an image file.
+def list_filenames(path):
+    """Given a path, lists all image(s) within the path. The input path can
+    either be (i) a directory in which case all the images will be listed in
+    the dictionary, or (ii) an image file.
 
     Returns:
-        imgs: A dictionary of of n-dim images. Keys are the original filenames
+        filenames: A list with all filenames
     """
-    mimetypes.init()
 
     ## Get filenames
     filenames = []
     if os.path.isdir(path):
         print(f"Images in '{path}' will be loaded")
         for file in os.listdir(path):
-            (type, encoding) = mimetypes.guess_type(file)
-            if type and "image" in type:
+            (filetype, _) = mimetypes.guess_type(file)
+            if filetype and "image" in filetype:
                 filenames.append(os.path.basename(file))
-        imagepath = path
     else:
         filenames.append(os.path.basename(path))
-        imagepath = os.path.dirname(path)
     print(f"{len(filenames)} images found in '{path}'")
+    return filenames
+
+
+def load_imgs(path, filenames):
+    """Given a path, loads image(s). The input path can either be (i) a
+    directory in which case all the JPG-images will be loaded into a
+    dictionary, or (ii) an image file.
+
+    Returns:
+        imgs: A dictionary of of n-dim images. Keys are the original filenames
+    """
+
+    def load_image(file):
+        img_data = None
+        try:
+            img_data = imread(os.path.join(path, file))
+        except ValueError:
+            print(f"'{file}' was unfortunately not an image. Skipping this one.")
+        return img_data
 
     ## Load images
     imgs = {}
-    for file in filenames:
-        print(f"\nImage: '{file}'")
-        try:
-            imgs[file] = imread(os.path.join(imagepath, file))
+    if isinstance(filenames, list):
+        for file in filenames:
+            print(f"\nImage: '{file}'")
+            imgs[file] = load_image(file)
             print("Done")
-        except ValueError:
-            print(f"'{file}' was unfortunately not an image. Skipping this one.")
+    elif isinstance(filenames, str):
+        imgs[filenames] = load_image(filenames)
+    else:
+        raise ValueError(
+            "Argument is an unexpected type. Only lists and strings are supported"
+        )
     return imgs
 
 
