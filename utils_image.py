@@ -97,7 +97,7 @@ def save_img(img, filename):
     imsave(filename, img)
 
 
-def resize_img(img, size=(400, 400), resample=Image.BILINEAR):
+def resize(img, size=(400, 400), resample=Image.BILINEAR):
     return np.asarray(Image.fromarray(np.uint8(img)).resize(size, resample))
 
 

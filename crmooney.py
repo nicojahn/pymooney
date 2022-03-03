@@ -46,11 +46,13 @@ def apply_mooney_transform(
     smooth_sigma = transformations.get("smooth_sigma", 6)
     threshold_method = transformations.get("threshold_method", "global_otsu")
 
+    file_ext="png"
+    
     # Convert to gray scale image
     if len(img.shape) > 2:
         img = utils_image.rgb2gray(img)
         fname = os.path.join(
-            mooneypath, imgname.split(".")[0] + "_g." + imgname.split(".")[1]
+            mooneypath, imgname.split(".")[0] + "_g." + file_ext
         )
         utils_image.save_img(img, fname)
 
@@ -58,21 +60,21 @@ def apply_mooney_transform(
     if resize:
         img = utils_image.resize(img, size=image_size)
         fname = os.path.join(
-            mooneypath, imgname.split(".")[0] + "_gr." + imgname.split(".")[1]
+            mooneypath, imgname.split(".")[0] + "_gr." + file_ext
         )
         utils_image.save_img(img, fname)
 
     # Smooth image
     img = utils_image.gauss_filter(img, sigma=smooth_sigma)
     fname = os.path.join(
-        mooneypath, imgname.split(".")[0] + "_s." + imgname.split(".")[1]
+        mooneypath, imgname.split(".")[0] + "_s." + file_ext
     )
     utils_image.save_img(img, fname)
 
     # Create Mooney image
     img, threshold = utils_image.threshold_img(img, method=threshold_method)
     fname = os.path.join(
-        mooneypath, imgname.split(".")[0] + "_m." + imgname.split(".")[1]
+        mooneypath, imgname.split(".")[0] + "_m." + file_ext
     )
     utils_image.save_img(img, fname)
 
@@ -366,7 +368,7 @@ if __name__ == "__main__":
             pages_to_get=[1],
             per_page=2,
             resize=False,
-            smooth_sigma=6,
+            smooth_sigma=2,
             image_size=(400, 400),
             threshold_method="global_otsu",
         )
@@ -400,7 +402,7 @@ if __name__ == "__main__":
         imgs = crmooney_frompath(
             imagepath,
             resize=False,
-            smooth_sigma=6,
+            smooth_sigma=2,
             image_size=(400, 400),
             threshold_method="global_otsu",
         )
