@@ -46,36 +46,28 @@ def apply_mooney_transform(
     smooth_sigma = transformations.get("smooth_sigma", 6)
     threshold_method = transformations.get("threshold_method", "global_otsu")
 
-    file_ext="png"
-    
+    file_ext = "png"
+
     # Convert to gray scale image
     if len(img.shape) > 2:
         img = utils_image.rgb2gray(img)
-        fname = os.path.join(
-            mooneypath, imgname.split(".")[0] + "_g." + file_ext
-        )
+        fname = os.path.join(mooneypath, imgname.split(".")[0] + "_g." + file_ext)
         utils_image.save_img(img, fname)
 
     # Resize image
     if resize:
         img = utils_image.resize(img, size=image_size)
-        fname = os.path.join(
-            mooneypath, imgname.split(".")[0] + "_gr." + file_ext
-        )
+        fname = os.path.join(mooneypath, imgname.split(".")[0] + "_gr." + file_ext)
         utils_image.save_img(img, fname)
 
     # Smooth image
     img = utils_image.gauss_filter(img, sigma=smooth_sigma)
-    fname = os.path.join(
-        mooneypath, imgname.split(".")[0] + "_s." + file_ext
-    )
+    fname = os.path.join(mooneypath, imgname.split(".")[0] + "_s." + file_ext)
     utils_image.save_img(img, fname)
 
     # Create Mooney image
     img, threshold = utils_image.threshold_img(img, method=threshold_method)
-    fname = os.path.join(
-        mooneypath, imgname.split(".")[0] + "_m." + file_ext
-    )
+    fname = os.path.join(mooneypath, imgname.split(".")[0] + "_m." + file_ext)
     utils_image.save_img(img, fname)
 
     # Store resulting image in a dict
