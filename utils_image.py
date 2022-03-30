@@ -114,6 +114,8 @@ def rgb2gray(img):
 
 def gauss_filter(img, sigma=4, mode="nearest"):
     print(f"Smooth image using a Gaussian kernel sigma {sigma}")
+    # h, w = img.shape
+    # return ndimage.filters.gaussian_filter(img, sigma=[sigma*(400/w), sigma*(400/h)], mode=mode)
     return ndimage.filters.gaussian_filter(img, sigma=sigma, mode=mode)
 
 

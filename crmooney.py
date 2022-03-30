@@ -393,7 +393,7 @@ if __name__ == "__main__":
 
         imgs = crmooney_frompath(
             imagepath,
-            resize=False,
+            resize=True,
             smooth_sigma=2,
             image_size=(400, 400),
             threshold_method="global_otsu",
