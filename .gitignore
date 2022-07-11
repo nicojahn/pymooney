@@ -5,3 +5,6 @@ __pycache__/
 
 # Directories
 images/
+
+# macOS files
+.DS_Store
